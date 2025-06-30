@@ -1,5 +1,4 @@
-// src/app/page.tsx
-'use client'; // Client Componentとしてマーク
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import LifeMeterDisplay from '@/components/LifeMeterDisplay';
@@ -7,164 +6,252 @@ import ActionInput from '@/components/ActionInput';
 import {
   calculateExpectedLifespan,
   calculateRemainingLifeMillis,
-  convertMillisToUnits,
-} from '@/lib/lifeCalculator';
-import {
-  loadUserData,
-  saveUserData,
-  loadActionLogs,
-  saveActionLogs,
-  ActionLog,
-} from '@/lib/localStorageUtils';
+  calculateCurrentAge,
+  PersonalInfo,
+  LifestyleFactors
+} from '@/utils/lifeCalculator';
 
-interface UserData {
-  birthDate: string;
-  currentRemainingLifeMillis: number;
-  lastUpdated: number;
+interface Action {
+  id: string;
+  name: string;
+  impact: number;
+  type: 'positive' | 'negative';
+  description: string;
 }
 
 export default function Home() {
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [remainingLifeMillis, setRemainingLifeMillis] = useState<number>(0);
-  const [lifeUnits, setLifeUnits] = useState({ years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [birthDateInput, setBirthDateInput] = useState<string>('');
-  const [actionLogs, setActionLogs] = useState<ActionLog[]>([]);
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    birthDate: new Date('1990-01-01'),
+    gender: 'other' as const
+  });
+  
+  const [lifestyleFactors, setLifestyleFactors] = useState<LifestyleFactors>({
+    smoking: false,
+    regularExercise: true,
+    healthyDiet: true,
+    excessiveAlcohol: false,
+    chronicStress: false,
+    socialConnections: true
+  });
 
-  // 1. 初期ロードとLocalStorageからのデータ復元
+  const [actions, setActions] = useState<Action[]>([]);
+  const [showSetup, setShowSetup] = useState(true);
+  const [remainingLifeMillis, setRemainingLifeMillis] = useState(0);
+
+  // Calculate values
+  const expectedLifespan = calculateExpectedLifespan(personalInfo, lifestyleFactors);
+  const currentAge = calculateCurrentAge(personalInfo.birthDate);
+  const totalActionImpact = actions.reduce((sum, action) => sum + action.impact, 0);
+
+  // Update remaining life milliseconds every second
   useEffect(() => {
-    const storedUserData = loadUserData();
-    const storedActionLogs = loadActionLogs();
-    
-    if (storedUserData) {
-      setUserData(storedUserData);
-      setRemainingLifeMillis(storedUserData.currentRemainingLifeMillis);
-    }
-    setActionLogs(storedActionLogs);
-  }, []);
-
-  // 2. 寿命のリアルタイム更新
-  useEffect(() => {
-    if (userData) {
-      const interval = setInterval(() => {
-        // 現在の残り寿命から経過時間を引く
-        // 前回の更新からの経過時間を考慮して正確に減算
-        const now = Date.now();
-        const elapsed = now - userData.lastUpdated; // ミリ秒単位で経過時間を計算
-
-        const newRemaining = userData.currentRemainingLifeMillis - elapsed;
-        setRemainingLifeMillis(newRemaining > 0 ? newRemaining : 0);
-
-        // userData.lastUpdated を更新し、LocalStorageにも保存
-        const updatedUserData = { ...userData, lastUpdated: now, currentRemainingLifeMillis: newRemaining > 0 ? newRemaining : 0 };
-        setUserData(updatedUserData); // Stateも更新
-        saveUserData(updatedUserData); // LocalStorageにも保存
-
-        setLifeUnits(convertMillisToUnits(newRemaining));
-      }, 1000); // 1秒ごとに更新
-
-      return () => clearInterval(interval); // クリーンアップ
-    }
-  }, [userData]);
-
-  // 3. 生年月日入力処理
-  const handleSetBirthDate = () => {
-    if (!birthDateInput) {
-      alert('生年月日を入力してください。');
-      return;
-    }
-
-    const expectedLifespan = calculateExpectedLifespan(birthDateInput);
-    const initialRemainingMillis = calculateRemainingLifeMillis(birthDateInput, expectedLifespan);
-    
-    const newUserData: UserData = {
-      birthDate: birthDateInput,
-      currentRemainingLifeMillis: initialRemainingMillis,
-      lastUpdated: Date.now(), // 初回設定時も最終更新日時を記録
+    const updateRemainingLife = () => {
+      const remaining = calculateRemainingLifeMillis(
+        personalInfo.birthDate,
+        expectedLifespan,
+        totalActionImpact
+      );
+      setRemainingLifeMillis(remaining);
     };
 
-    setUserData(newUserData);
-    setRemainingLifeMillis(initialRemainingMillis);
-    saveUserData(newUserData);
+    updateRemainingLife();
+    const interval = setInterval(updateRemainingLife, 1000);
+    return () => clearInterval(interval);
+  }, [personalInfo.birthDate, expectedLifespan, totalActionImpact]);
+
+  const handleActionAdd = (action: Action) => {
+    setActions(prev => [...prev, action]);
   };
 
-  // 4. 行動追加処理
-  const handleAddAction = (log: Omit<ActionLog, 'timestamp'>) => {
-    if (!userData) return;
-
-    const timestamp = Date.now();
-    const newLog: ActionLog = { ...log, timestamp };
-
-    const updatedLogs = [...actionLogs, newLog];
-    setActionLogs(updatedLogs);
-    saveActionLogs(updatedLogs);
-
-    // 寿命メーターを更新
-    const newRemainingLifeMillis = userData.currentRemainingLifeMillis + log.amountMillis;
-    const updatedUserData: UserData = {
-      ...userData,
-      currentRemainingLifeMillis: newRemainingLifeMillis,
-      lastUpdated: timestamp, // アクション時も最終更新日時を記録
-    };
-    setUserData(updatedUserData);
-    setRemainingLifeMillis(newRemainingLifeMillis);
-    saveUserData(updatedUserData);
+  const handleSetupSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowSetup(false);
   };
 
-  if (!userData) {
+  if (showSetup) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-900 to-indigo-900 text-white">
-        <div className="bg-gray-800 p-8 rounded-lg shadow-xl text-center max-w-md w-full">
-          <h1 className="text-3xl font-bold mb-6 text-emerald-400">人生の羅針盤</h1>
-          <p className="mb-4 text-lg">
-            あなたの生年月日を入力して、寿命のカウントダウンを開始しましょう。
-          </p>
-          <input
-            type="date"
-            value={birthDateInput}
-            onChange={(e) => setBirthDateInput(e.target.value)}
-            className="w-full p-3 mb-4 rounded-md bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-          <button
-            onClick={handleSetBirthDate}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
-          >
-            スタート！
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+              Positive Life Meter
+            </h1>
+            <p className="text-gray-600 mb-8 text-center">
+              あなたの人生の残り時間を可視化し、より充実した日々を送るためのツールです
+            </p>
+
+            <form onSubmit={handleSetupSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  生年月日
+                </label>
+                <input
+                  type="date"
+                  value={personalInfo.birthDate.toISOString().split('T')[0]}
+                  onChange={(e) => setPersonalInfo(prev => ({
+                    ...prev,
+                    birthDate: new Date(e.target.value)
+                  }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  性別
+                </label>
+                <select
+                  value={personalInfo.gender}
+                  onChange={(e) => setPersonalInfo(prev => ({
+                    ...prev,
+                    gender: e.target.value as 'male' | 'female' | 'other'
+                  }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="male">男性</option>
+                  <option value="female">女性</option>
+                  <option value="other">その他</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  ライフスタイル
+                </label>
+                <div className="space-y-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={lifestyleFactors.smoking}
+                      onChange={(e) => setLifestyleFactors(prev => ({
+                        ...prev,
+                        smoking: e.target.checked
+                      }))}
+                      className="mr-2"
+                    />
+                    喫煙している
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={lifestyleFactors.regularExercise}
+                      onChange={(e) => setLifestyleFactors(prev => ({
+                        ...prev,
+                        regularExercise: e.target.checked
+                      }))}
+                      className="mr-2"
+                    />
+                    定期的に運動している
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={lifestyleFactors.healthyDiet}
+                      onChange={(e) => setLifestyleFactors(prev => ({
+                        ...prev,
+                        healthyDiet: e.target.checked
+                      }))}
+                      className="mr-2"
+                    />
+                    健康的な食事を心がけている
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={lifestyleFactors.excessiveAlcohol}
+                      onChange={(e) => setLifestyleFactors(prev => ({
+                        ...prev,
+                        excessiveAlcohol: e.target.checked
+                      }))}
+                      className="mr-2"
+                    />
+                    過度な飲酒をしている
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={lifestyleFactors.chronicStress}
+                      onChange={(e) => setLifestyleFactors(prev => ({
+                        ...prev,
+                        chronicStress: e.target.checked
+                      }))}
+                      className="mr-2"
+                    />
+                    慢性的なストレスを感じている
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={lifestyleFactors.socialConnections}
+                      onChange={(e) => setLifestyleFactors(prev => ({
+                        ...prev,
+                        socialConnections: e.target.checked
+                      }))}
+                      className="mr-2"
+                    />
+                    良好な人間関係がある
+                  </label>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+              >
+                ライフメーターを開始
+              </button>
+            </form>
+          </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-8 bg-gradient-to-br from-blue-900 to-indigo-900 text-white">
-      <h1 className="text-4xl font-extrabold mb-8 mt-4 text-emerald-400 drop-shadow-lg">
-        ポジティブ寿命メーター
-      </h1>
-      <LifeMeterDisplay {...lifeUnits} />
-      <ActionInput onAddAction={handleAddAction} />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            Positive Life Meter
+          </h1>
+          <p className="text-gray-600">
+            現在 {currentAge} 歳 | 予想寿命 {expectedLifespan.toFixed(1)} 歳
+          </p>
+          <button
+            onClick={() => setShowSetup(true)}
+            className="mt-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+          >
+            設定を変更
+          </button>
+        </header>
 
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-8 w-full max-w-2xl">
-        <h3 className="text-2xl font-bold mb-4 text-center text-white">行動履歴</h3>
-        {actionLogs.length === 0 ? (
-          <p className="text-center text-gray-400">まだ行動が記録されていません。</p>
-        ) : (
-          <ul className="space-y-3">
-            {actionLogs.map((log, index) => (
-              <li key={index} className={`p-3 rounded-md flex justify-between items-center ${log.type === 'positive' ? 'bg-emerald-800' : 'bg-red-800'}`}>
-                <div>
-                  <span className="font-semibold">{log.description}</span>
-                  <span className="block text-sm text-gray-300">
-                    {new Date(log.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <span className={`font-bold text-lg ${log.type === 'positive' ? 'text-emerald-300' : 'text-red-300'}`}>
-                  {log.type === 'positive' ? '+' : ''}{log.amountMillis / (24 * 60 * 60 * 1000)}日
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <LifeMeterDisplay
+              remainingLifeMillis={remainingLifeMillis}
+              expectedLifespan={expectedLifespan}
+              currentAge={currentAge}
+            />
+          </div>
+          
+          <div>
+            <ActionInput
+              onActionAdd={handleActionAdd}
+              actions={actions}
+            />
+          </div>
+        </div>
+
+        <footer className="text-center mt-8 text-gray-500 text-sm">
+          ※ このツールは娯楽目的であり、実際の寿命を保証するものではありません
+        </footer>
       </div>
-    </main>
+    </div>
   );
 }
