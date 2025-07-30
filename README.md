@@ -1,34 +1,67 @@
-# Positive Life Meter - 人生残り時間可視化アプリ
+# Positive Life Meter
 
-このプロジェクトは、あなたの人生の残り時間を可視化し、より充実した日々を送るためのWebアプリケーションです。
+This is a web application that visualizes your remaining life time to help you live a more fulfilling life.
 
-## 概要
+## Overview
 
-生年月日や性別、ライフスタイル要因（喫煙、運動、食事など）を入力することで予想寿命を計算し、残りの人生をリアルタイムで表示します。日々の行動が寿命に与える影響を視覚的に把握し、健康的な生活習慣への意識を高めることを目的としています。
+By inputting your date of birth, gender, and lifestyle factors (smoking, exercise, diet, etc.), this application calculates your estimated life expectancy and displays your remaining life in real-time. The goal is to raise awareness of healthy lifestyle habits by visually grasping the impact of daily actions on your lifespan.
 
-## 機能
+## Features
 
--   **個人情報入力:** 生年月日と性別を入力します。
--   **ライフスタイル要因設定:** 喫煙、運動習慣、食生活、飲酒量、ストレス、人間関係などの要因を設定します。
--   **予想寿命計算:** 入力された情報に基づいて、AIが予想寿命を算出します。
--   **残り時間リアルタイム表示:** 予想寿命から現在の年齢を差し引いた残り時間を、年、月、日、時間、分、秒、ミリ秒単位でリアルタイムにカウントダウン表示します。
--   **行動による寿命への影響:** ポジティブな行動（例: 運動、健康的な食事）やネガティブな行動（例: 喫煙、過度な飲酒）が、残り時間にどのように影響するかをシミュレーションできます。
--   **視覚的な進捗:** 残り時間の割合をプログレスバーなどで視覚的に表示します。
+- **Personal Information Input:** Enter your date of birth and gender.
+- **Lifestyle Factors:** Set factors such as smoking, exercise habits, diet, alcohol consumption, stress, and social connections.
+- **Estimated Life Expectancy Calculation:** An AI calculates your estimated life expectancy based on the information you provide.
+- **Real-time Remaining Time Display:** The remaining time, calculated by subtracting your current age from your estimated life expectancy, is displayed in a real-time countdown of years, months, days, hours, minutes, seconds, and milliseconds.
+- **Impact of Actions on Lifespan:** You can simulate how positive actions (e.g., exercise, healthy eating) and negative actions (e.g., smoking, excessive drinking) affect your remaining time.
+- **Visual Progress:** The percentage of remaining time is displayed visually with a progress bar.
 
-## 使い方
+## How to Use
 
-1.  アプリを起動し、生年月日と性別を入力します。
-2.  ライフスタイル要因のチェックボックスをON/OFFして、あなたの生活習慣を反映させます。
-3.  「ライフメーターを開始」ボタンをクリックすると、予想寿命と残り時間が表示されます。
-4.  日々の行動（例: 運動した、健康的な食事をした）を入力することで、残り時間がどのように変化するかを観察できます。
+1.  Launch the application and enter your date of birth and gender.
+2.  Turn the lifestyle factor checkboxes on/off to reflect your lifestyle.
+3.  Click the "Start Life Meter" button to display your estimated life expectancy and remaining time.
+4.  You can observe how your remaining time changes by inputting your daily actions (e.g., exercised, ate a healthy meal).
 
-## 技術スタック
+## Technologies Used
 
--   **フレームワーク:** Next.js
--   **ライブラリ:** React
--   **言語:** TypeScript
--   **スタイリング:** Tailwind CSS
+-   **Framework:** [Next.js](https://nextjs.org/)
+-   **Language:** [TypeScript](https://www.typescriptlang.org/)
+-   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 
-## ライブデモ
+## Getting Started
 
-（このプロジェクトがGitHub Pagesで公開されている場合、ここにURLを記載します。現状では不明なためプレースホルダーとします。）
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+- Node.js (v16.x or later)
+- npm, yarn, or pnpm
+
+### Installation
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/iidaatcnt/positive-life-meter.git
+   ```
+2. Install NPM packages
+   ```sh
+   npm install
+   ```
+
+### Usage
+
+To start the development server, run the following command:
+
+```sh
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+## Disclaimer
+
+This tool is for entertainment purposes only and does not guarantee your actual lifespan.
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
