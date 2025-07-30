@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Positive Life Meter - 人生残り時間可視化アプリ
 
-## Getting Started
+このプロジェクトは、あなたの人生の残り時間を可視化し、より充実した日々を送るためのWebアプリケーションです。
 
-First, run the development server:
+## 概要
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+生年月日や性別、ライフスタイル要因（喫煙、運動、食事など）を入力することで予想寿命を計算し、残りの人生をリアルタイムで表示します。日々の行動が寿命に与える影響を視覚的に把握し、健康的な生活習慣への意識を高めることを目的としています。
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 機能
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+-   **個人情報入力:** 生年月日と性別を入力します。
+-   **ライフスタイル要因設定:** 喫煙、運動習慣、食生活、飲酒量、ストレス、人間関係などの要因を設定します。
+-   **予想寿命計算:** 入力された情報に基づいて、AIが予想寿命を算出します。
+-   **残り時間リアルタイム表示:** 予想寿命から現在の年齢を差し引いた残り時間を、年、月、日、時間、分、秒、ミリ秒単位でリアルタイムにカウントダウン表示します。
+-   **行動による寿命への影響:** ポジティブな行動（例: 運動、健康的な食事）やネガティブな行動（例: 喫煙、過度な飲酒）が、残り時間にどのように影響するかをシミュレーションできます。
+-   **視覚的な進捗:** 残り時間の割合をプログレスバーなどで視覚的に表示します。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 使い方
 
-## Learn More
+1.  アプリを起動し、生年月日と性別を入力します。
+2.  ライフスタイル要因のチェックボックスをON/OFFして、あなたの生活習慣を反映させます。
+3.  「ライフメーターを開始」ボタンをクリックすると、予想寿命と残り時間が表示されます。
+4.  日々の行動（例: 運動した、健康的な食事をした）を入力することで、残り時間がどのように変化するかを観察できます。
 
-To learn more about Next.js, take a look at the following resources:
+## 技術スタック
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-   **フレームワーク:** Next.js
+-   **ライブラリ:** React
+-   **言語:** TypeScript
+-   **スタイリング:** Tailwind CSS
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ライブデモ
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+（このプロジェクトがGitHub Pagesで公開されている場合、ここにURLを記載します。現状では不明なためプレースホルダーとします。）
